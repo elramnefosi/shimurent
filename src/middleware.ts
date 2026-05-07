@@ -7,7 +7,8 @@ export async function middleware(req: NextRequest) {
   if (isLoginPage || isApiRoute) return NextResponse.next()
 
   const auth = req.cookies.get('shimurent-auth')?.value
-  if (auth !== process.env.AUTH_SECRET) {
+  const secret = process.env.AUTH_SECRET
+  if (!auth || !secret || auth !== secret) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 

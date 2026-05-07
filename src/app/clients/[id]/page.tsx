@@ -23,6 +23,9 @@ export default function ClientPage() {
   const [showEditClient, setShowEditClient] = useState(false)
   const [editForm, setEditForm] = useState({ birth_date: '', address: '', phone: '', email: '', id_number: '' })
   const [savingClient, setSavingClient] = useState(false)
+  const [editingMember, setEditingMember] = useState<FamilyMember | null>(null)
+  const [editMemberForm, setEditMemberForm] = useState({ name: '', id_number: '', relation: '', gender: '', birth_date: '' })
+  const [savingEditMember, setSavingEditMember] = useState(false)
 
   function openEditClient() {
     if (!client) return
@@ -55,6 +58,27 @@ export default function ClientPage() {
     setPolicies(p ?? [])
     setMembers(m ?? [])
     setLoading(false)
+  }
+
+  function openEditMember(m: FamilyMember) {
+    setEditingMember(m)
+    setEditMemberForm({
+      name: m.name,
+      id_number: m.id_number ?? '',
+      relation: m.relation ?? '',
+      gender: m.gender ?? '',
+      birth_date: m.birth_date ?? '',
+    })
+  }
+
+  async function saveEditMember(e: React.SyntheticEvent) {
+    e.preventDefault()
+    if (!editingMember) return
+    setSavingEditMember(true)
+    await supabase.from('family_members').update(editMemberForm).eq('id', editingMember.id)
+    setEditingMember(null)
+    setSavingEditMember(false)
+    load()
   }
 
   async function addMember(e: React.SyntheticEvent) {
@@ -199,9 +223,12 @@ export default function ClientPage() {
                   {m.id_number && <span className="text-xs text-slate-400 mr-1">ת.ז. {m.id_number}</span>}
                   {(m as any).birth_date && <span className="text-xs text-slate-400 mr-1">🎂 {formatDate((m as any).birth_date)}</span>}
                 </div>
-                <button onClick={() => deleteMember(m.id)} className="text-slate-300 hover:text-red-400 transition-colors">
-                  <X size={14} />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button onClick={() => openEditMember(m)} className="text-slate-400 hover:text-blue-500 transition-colors text-xs">✏️</button>
+                  <button onClick={() => deleteMember(m.id)} className="text-slate-300 hover:text-red-400 transition-colors">
+                    <X size={14} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -241,6 +268,47 @@ export default function ClientPage() {
                     {savingMember ? 'שומר...' : 'הוסף'}
                   </button>
                   <button type="button" onClick={() => setShowAddMember(false)}
+                    className="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-lg font-medium hover:bg-slate-200 text-sm">
+                    ביטול
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit member modal */}
+        {editingMember && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setEditingMember(null)}>
+            <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-bold mb-4">עריכת בן/בת משפחה</h3>
+              <form onSubmit={saveEditMember} className="space-y-3" dir="rtl">
+                <input required value={editMemberForm.name} onChange={e => setEditMemberForm({...editMemberForm, name: e.target.value})}
+                  placeholder="שם מלא *" className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input value={editMemberForm.id_number} onChange={e => setEditMemberForm({...editMemberForm, id_number: e.target.value})}
+                  placeholder="תעודת זהות" className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <select value={editMemberForm.relation} onChange={e => setEditMemberForm({...editMemberForm, relation: e.target.value})}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">קשר משפחתי</option>
+                  {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+                <select value={editMemberForm.gender} onChange={e => setEditMemberForm({...editMemberForm, gender: e.target.value})}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">מין</option>
+                  <option value="זכר">זכר</option>
+                  <option value="נקבה">נקבה</option>
+                </select>
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">תאריך לידה</label>
+                  <input type="date" value={editMemberForm.birth_date} onChange={e => setEditMemberForm({...editMemberForm, birth_date: e.target.value})}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div className="flex gap-3 pt-1">
+                  <button type="submit" disabled={savingEditMember}
+                    className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 text-sm">
+                    {savingEditMember ? 'שומר...' : 'שמור'}
+                  </button>
+                  <button type="button" onClick={() => setEditingMember(null)}
                     className="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-lg font-medium hover:bg-slate-200 text-sm">
                     ביטול
                   </button>

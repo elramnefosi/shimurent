@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Shield } from 'lucide-react'
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -15,7 +16,7 @@ export default function LoginPage() {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email, password }),
     })
 
     if (res.ok) {
@@ -38,6 +39,17 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4" dir="rtl">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">אימייל</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="agent@example.com"
+              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">סיסמה</label>
             <input

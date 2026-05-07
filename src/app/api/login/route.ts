@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const { password } = await req.json()
+  const { email, password } = await req.json()
 
-  if (password !== process.env.AUTH_SECRET) {
+  if (email !== process.env.AUTH_EMAIL || password !== process.env.AUTH_SECRET) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 

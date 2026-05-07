@@ -18,8 +18,32 @@ export default function ClientPage() {
   const [uploading, setUploading] = useState(false)
   const [extracting, setExtracting] = useState(false)
   const [showAddMember, setShowAddMember] = useState(false)
-  const [memberForm, setMemberForm] = useState({ name: '', id_number: '', relation: '' })
+  const [memberForm, setMemberForm] = useState({ name: '', id_number: '', relation: '', gender: '', birth_date: '' })
   const [savingMember, setSavingMember] = useState(false)
+  const [showEditClient, setShowEditClient] = useState(false)
+  const [editForm, setEditForm] = useState({ birth_date: '', address: '', phone: '', email: '', id_number: '' })
+  const [savingClient, setSavingClient] = useState(false)
+
+  function openEditClient() {
+    if (!client) return
+    setEditForm({
+      birth_date: client.birth_date ?? '',
+      address: client.address ?? '',
+      phone: client.phone ?? '',
+      email: client.email ?? '',
+      id_number: client.id_number ?? '',
+    })
+    setShowEditClient(true)
+  }
+
+  async function saveClient(e: React.SyntheticEvent) {
+    e.preventDefault()
+    setSavingClient(true)
+    await supabase.from('clients').update(editForm).eq('id', id)
+    setShowEditClient(false)
+    setSavingClient(false)
+    load()
+  }
 
   useEffect(() => { load() }, [id])
 
@@ -38,7 +62,7 @@ export default function ClientPage() {
     if (!memberForm.name.trim()) return
     setSavingMember(true)
     await supabase.from('family_members').insert({ client_id: id, ...memberForm })
-    setMemberForm({ name: '', id_number: '', relation: '' })
+    setMemberForm({ name: '', id_number: '', relation: '', gender: '', birth_date: '' })
     setShowAddMember(false)
     setSavingMember(false)
     load()
@@ -106,9 +130,49 @@ export default function ClientPage() {
               </div>
             </div>
           </div>
-          <div className="text-sm text-slate-400">לקוח מ-{formatDate(client.created_at)}</div>
+          <div className="flex flex-col items-end gap-2">
+            <div className="text-sm text-slate-400">לקוח מ-{formatDate(client.created_at)}</div>
+            <button onClick={openEditClient}
+              className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+              ✏️ עריכה
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Edit client modal */}
+      {showEditClient && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowEditClient(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4">עריכת פרטי לקוח</h3>
+            <form onSubmit={saveClient} className="space-y-3" dir="rtl">
+              <input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})}
+                placeholder="טלפון" className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input value={editForm.email} type="email" onChange={e => setEditForm({...editForm, email: e.target.value})}
+                placeholder="אימייל" className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input value={editForm.id_number} onChange={e => setEditForm({...editForm, id_number: e.target.value})}
+                placeholder="תעודת זהות" className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input value={editForm.address} onChange={e => setEditForm({...editForm, address: e.target.value})}
+                placeholder="כתובת" className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">תאריך לידה</label>
+                <input type="date" value={editForm.birth_date} onChange={e => setEditForm({...editForm, birth_date: e.target.value})}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="submit" disabled={savingClient}
+                  className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 text-sm">
+                  {savingClient ? 'שומר...' : 'שמור'}
+                </button>
+                <button type="button" onClick={() => setShowEditClient(false)}
+                  className="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-lg font-medium hover:bg-slate-200 text-sm">
+                  ביטול
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Family members */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-6">
@@ -131,7 +195,9 @@ export default function ClientPage() {
                 <div>
                   <span className="text-sm font-medium text-slate-800">{m.name}</span>
                   {m.relation && <span className="text-xs text-slate-500 mr-1.5">({m.relation})</span>}
+                  {m.gender && <span className="text-xs text-slate-400 mr-1">{m.gender}</span>}
                   {m.id_number && <span className="text-xs text-slate-400 mr-1">ת.ז. {m.id_number}</span>}
+                  {(m as any).birth_date && <span className="text-xs text-slate-400 mr-1">🎂 {formatDate((m as any).birth_date)}</span>}
                 </div>
                 <button onClick={() => deleteMember(m.id)} className="text-slate-300 hover:text-red-400 transition-colors">
                   <X size={14} />
@@ -158,6 +224,17 @@ export default function ClientPage() {
                   <option value="">קשר משפחתי</option>
                   {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
+                <select value={memberForm.gender} onChange={e => setMemberForm({ ...memberForm, gender: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">מין</option>
+                  <option value="זכר">זכר</option>
+                  <option value="נקבה">נקבה</option>
+                </select>
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">תאריך לידה</label>
+                  <input type="date" value={memberForm.birth_date} onChange={e => setMemberForm({ ...memberForm, birth_date: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
                 <div className="flex gap-3 pt-1">
                   <button type="submit" disabled={savingMember}
                     className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 text-sm">

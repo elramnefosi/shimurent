@@ -10,6 +10,8 @@ export type FamilyMember = {
   name: string
   id_number: string
   relation: string
+  gender: string
+  birth_date: string | null
   created_at: string
 }
 

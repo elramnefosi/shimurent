@@ -37,6 +37,8 @@ export type Client = {
   phone: string
   email: string
   id_number: string
+  birth_date: string | null
+  address: string
   created_at: string
   policies?: Policy[]
 }

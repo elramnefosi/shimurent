@@ -97,10 +97,12 @@ export default function ClientPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900">{client.name}</h1>
-              <div className="flex gap-4 mt-1 text-sm text-slate-500">
+              <div className="flex flex-wrap gap-4 mt-1 text-sm text-slate-500">
                 {client.phone && <span>📞 {client.phone}</span>}
                 {client.email && <span>✉️ {client.email}</span>}
                 {client.id_number && <span>🪪 {client.id_number}</span>}
+                {client.birth_date && <span>🎂 {formatDate(client.birth_date)}</span>}
+                {client.address && <span>📍 {client.address}</span>}
               </div>
             </div>
           </div>

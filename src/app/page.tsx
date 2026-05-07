@@ -11,7 +11,7 @@ export default function DashboardPage() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
-  const [form, setForm] = useState({ name: '', phone: '', email: '', id_number: '' })
+  const [form, setForm] = useState({ name: '', phone: '', email: '', id_number: '', birth_date: '', address: '' })
   const [saving, setSaving] = useState(false)
 
   useEffect(() => { loadClients() }, [])
@@ -30,7 +30,7 @@ export default function DashboardPage() {
     if (!form.name.trim()) return
     setSaving(true)
     await supabase.from('clients').insert(form)
-    setForm({ name: '', phone: '', email: '', id_number: '' })
+    setForm({ name: '', phone: '', email: '', id_number: '', birth_date: '', address: '' })
     setShowAdd(false)
     setSaving(false)
     loadClients()
@@ -114,12 +114,19 @@ export default function DashboardPage() {
                 { key: 'phone', placeholder: 'טלפון' },
                 { key: 'email', placeholder: 'אימייל', type: 'email' },
                 { key: 'id_number', placeholder: 'תעודת זהות' },
+                { key: 'address', placeholder: 'כתובת' },
               ].map(({ key, placeholder, required, type }) => (
                 <input key={key} required={required} type={type ?? 'text'}
                   value={(form as any)[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
                   placeholder={placeholder}
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               ))}
+              <div>
+                <label className="block text-xs text-slate-500 mb-1 text-right">תאריך לידה</label>
+                <input type="date" value={form.birth_date}
+                  onChange={e => setForm({ ...form, birth_date: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={saving}
                   className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 text-sm">

@@ -4,6 +4,15 @@ export type PolicyIncrease = {
   percent_change: number
 }
 
+export type FamilyMember = {
+  id: string
+  client_id: string
+  name: string
+  id_number: string
+  relation: string
+  created_at: string
+}
+
 export type Policy = {
   id: string
   client_id: string
@@ -18,6 +27,8 @@ export type Policy = {
   notes: string
   extracted_at: string | null
   created_at: string
+  member_id: string | null
+  member?: FamilyMember
 }
 
 export type Client = {

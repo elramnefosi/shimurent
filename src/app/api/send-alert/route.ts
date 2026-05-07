@@ -28,31 +28,72 @@ export async function POST(req: NextRequest) {
 
     // Email to client
     if (client?.email) {
+      const today = format(new Date(), 'dd/MM/yyyy')
       await resend.emails.send({
-        from: 'שימורנט <no-reply@shimurent.co.il>',
+        from: 'אלרם סוכנות לביטוח <no-reply@shimurent.co.il>',
         to: client.email,
-        subject: `עדכון חשוב על פוליסת הביטוח שלך — ${policy?.company}`,
+        subject: `הודעה חשובה בנוגע לפוליסת הביטוח שלך — ${policy?.company}`,
         html: `
-          <div dir="rtl" style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1e293b;">
-            <div style="background:#1e40af;padding:24px 32px;border-radius:12px 12px 0 0;">
-              <h1 style="color:white;margin:0;font-size:22px;">שימורנט</h1>
-              <p style="color:#93c5fd;margin:4px 0 0;font-size:14px;">מערכת שימור לקוחות</p>
+          <div dir="rtl" style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;color:#1e293b;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+
+            <!-- Header -->
+            <div style="background:#0f172a;padding:28px 36px;display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="color:white;font-size:22px;font-weight:bold;letter-spacing:-0.5px;">אלרם נפוסי</div>
+                <div style="color:#94a3b8;font-size:13px;margin-top:2px;">סוכנות לביטוח ופיננסים</div>
+              </div>
+              <div style="color:#64748b;font-size:13px;">${today}</div>
             </div>
-            <div style="background:white;padding:32px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;">
-              <p style="font-size:16px;">שלום <strong>${client.name}</strong>,</p>
-              <p style="color:#475569;">אנו פועלים בשמך להגשת <strong>הנחת שימור</strong> לחברת הביטוח שלך.</p>
-              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;margin:20px 0;">
-                <h3 style="margin:0 0 12px;color:#1e293b;">פרטי הפוליסה</h3>
-                <table style="width:100%;font-size:14px;color:#475569;">
-                  <tr><td style="padding:4px 0;"><strong>חברה:</strong></td><td>${policy?.company}</td></tr>
-                  <tr><td style="padding:4px 0;"><strong>מספר פוליסה:</strong></td><td>${policy?.policy_number || '—'}</td></tr>
-                  <tr><td style="padding:4px 0;"><strong>תאריך עלייה:</strong></td><td>${increaseDate}</td></tr>
-                  <tr><td style="padding:4px 0;"><strong>מחיר חדש:</strong></td><td>₪${alert.new_price}</td></tr>
+
+            <!-- Body -->
+            <div style="background:white;padding:36px;">
+
+              <p style="font-size:16px;margin:0 0 20px;">לכבוד,</p>
+              <p style="font-size:16px;font-weight:bold;margin:0 0 24px;">${client.name} שלום,</p>
+
+              <p style="color:#334155;line-height:1.8;font-size:15px;margin:0 0 16px;">
+                הנני לעדכנך כי <strong>עומדת לחול עלייה במחיר הפרמיה</strong> של פוליסת הביטוח שלך בחברת <strong>${policy?.company}</strong>,
+                החל מתאריך <strong>${increaseDate}</strong>.
+              </p>
+
+              <p style="color:#334155;line-height:1.8;font-size:15px;margin:0 0 16px;">
+                כסוכן הביטוח שלך, <strong>אני פועל כבר עתה מול חברת הביטוח</strong> לטיפול בבקשת הנחת שימור עבורך,
+                במטרה למנוע את העלייה הצפויה ולשמור על תנאי הפוליסה הקיימים.
+              </p>
+
+              <p style="color:#334155;line-height:1.8;font-size:15px;margin:0 0 24px;">
+                <strong>אין צורך בכל פעולה מצדך</strong> — אנו מטפלים בכך בשמך וניידע אותך בתוצאות בהקדם.
+              </p>
+
+              <!-- Policy details box -->
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-right:4px solid #1e40af;border-radius:8px;padding:20px;margin:24px 0;">
+                <div style="font-weight:bold;color:#1e293b;margin-bottom:14px;font-size:14px;">פרטי הפוליסה</div>
+                <table style="width:100%;font-size:14px;color:#475569;border-collapse:collapse;">
+                  <tr><td style="padding:5px 0;width:40%;"><strong>חברת ביטוח:</strong></td><td>${policy?.company}</td></tr>
+                  <tr><td style="padding:5px 0;"><strong>מספר פוליסה:</strong></td><td>${policy?.policy_number || '—'}</td></tr>
+                  <tr><td style="padding:5px 0;"><strong>סוג ביטוח:</strong></td><td>${policy?.policy_type || '—'}</td></tr>
+                  <tr><td style="padding:5px 0;"><strong>תאריך עלייה:</strong></td><td style="color:#dc2626;font-weight:bold;">${increaseDate}</td></tr>
+                  <tr><td style="padding:5px 0;"><strong>מחיר חדש צפוי:</strong></td><td style="color:#dc2626;font-weight:bold;">₪${alert.new_price} לחודש</td></tr>
                 </table>
               </div>
-              <p style="color:#475569;">הסוכן שלך, <strong>${settings.agent_name}</strong>, פועל להשגת הנחה עבורך בטרם העלייה.</p>
-              <p style="color:#64748b;font-size:13px;margin-top:24px;border-top:1px solid #e2e8f0;padding-top:16px;">
-                לשאלות: ${settings.agent_email}
+
+              <p style="color:#334155;line-height:1.8;font-size:15px;margin:0 0 8px;">
+                לשאלות ובירורים ניתן לפנות אליי ישירות:
+              </p>
+
+              <!-- Agent signature -->
+              <div style="border-top:1px solid #e2e8f0;padding-top:20px;margin-top:24px;">
+                <div style="font-weight:bold;font-size:15px;color:#0f172a;">${settings.agent_name}</div>
+                <div style="color:#64748b;font-size:13px;margin-top:4px;">סוכן ביטוח מורשה | אלרם סוכנות לביטוח</div>
+                <div style="color:#3b82f6;font-size:13px;margin-top:4px;">${settings.agent_email}</div>
+              </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div style="background:#f8fafc;padding:16px 36px;border-top:1px solid #e2e8f0;text-align:center;">
+              <p style="color:#94a3b8;font-size:11px;margin:0;">
+                הודעה זו נשלחה אוטומטית ממערכת ניהול הפוליסות של אלרם סוכנות לביטוח
               </p>
             </div>
           </div>`,

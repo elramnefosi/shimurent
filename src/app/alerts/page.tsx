@@ -99,6 +99,28 @@ export default function AlertsPage() {
                     )}>
                       {days <= 0 ? 'עלה כבר!' : `${days} ימים לעלייה`} — {formatDate(alert.increase_date)} — ₪{alert.new_price}
                     </div>
+                    {(() => {
+                      const inc = policy?.increases?.find((i: any) =>
+                        new Date(i.date).toDateString() === new Date(alert.increase_date).toDateString()
+                      )
+                      if (!inc?.reason) return null
+                      const reasonMap: Record<string, { label: string; color: string; action: string }> = {
+                        discount: { label: '📉 מדרג הנחות', color: 'bg-orange-100 text-orange-700', action: '← ניתן להגיש הנחת שימור' },
+                        age:      { label: '🎂 עלייה מגיל',  color: 'bg-slate-100 text-slate-600',  action: '← לא ניתן למנוע' },
+                        both:     { label: '📉🎂 הנחות + גיל', color: 'bg-orange-100 text-orange-700', action: '← ניתן לפעול על ההנחות' },
+                        unknown:  { label: '❓ סיבה לא ידועה', color: 'bg-slate-100 text-slate-500', action: '' },
+                      }
+                      const r = reasonMap[inc.reason]
+                      return (
+                        <div className="mt-1.5 flex flex-wrap gap-2 items-center">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${r.color}`}>
+                            {r.label}
+                          </span>
+                          {r.action && <span className="text-xs text-slate-500">{r.action}</span>}
+                          {inc.reason_note && <span className="text-xs text-slate-400 italic">{inc.reason_note}</span>}
+                        </div>
+                      )
+                    })()}
                     {alert.client_email_sent_at && (
                       <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
                         <CheckCircle size={11} /> מייל נשלח ללקוח {formatDate(alert.client_email_sent_at)}

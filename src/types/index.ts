@@ -2,6 +2,8 @@ export type PolicyIncrease = {
   date: string
   new_price: number
   percent_change: number
+  reason?: 'discount' | 'age' | 'both' | 'unknown'
+  reason_note?: string
 }
 
 export type FamilyMember = {

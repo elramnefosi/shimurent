@@ -38,7 +38,7 @@ export default function AlertsPage() {
     loadAlerts()
   }
 
-  const pending = alerts.filter(a => a.status !== 'handled' && daysUntil(a.increase_date) <= 60)
+  const pending = alerts.filter(a => a.status !== 'handled')
   const handled = alerts.filter(a => a.status === 'handled')
 
   return (

@@ -29,7 +29,10 @@ export default function DashboardPage() {
     e.preventDefault()
     if (!form.name.trim()) return
     setSaving(true)
-    await supabase.from('clients').insert(form)
+    await supabase.from('clients').insert({
+      ...form,
+      birth_date: form.birth_date || null,
+    })
     setForm({ name: '', phone: '', email: '', id_number: '', birth_date: '', address: '' })
     setShowAdd(false)
     setSaving(false)

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     if (client?.email) {
       const today = format(new Date(), 'dd/MM/yyyy')
       await resend.emails.send({
-        from: 'אלרם סוכנות לביטוח <onboarding@resend.dev>',
+        from: 'אלרם סוכנות לביטוח <elram@gal-almagor.co.il>',
         replyTo: settings.agent_email,
         to: client.email,
         subject: `הודעה חשובה בנוגע לפוליסת הביטוח שלך — ${policy?.company}`,
